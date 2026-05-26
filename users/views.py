@@ -6,6 +6,7 @@ from django.views.generic import CreateView, DetailView, UpdateView, ListView, V
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.utils.decorators import method_decorator
+from django.urls import reverse
 import json
 
 from .models import User, Skill, Project
@@ -38,7 +39,7 @@ class LoginView(AuthLoginView):
     redirect_authenticated_user = True
     
     def get_success_url(self):
-        return 'projects:project_list'
+        return reverse('projects:project_list')
 
 
 class LogoutView(LoginRequiredMixin, View):
@@ -71,7 +72,7 @@ class EditProfileView(LoginRequiredMixin, UpdateView):
         return self.request.user
     
     def get_success_url(self):
-        return 'users:user_detail'
+        return reverse('users:user_detail', kwargs={'user_id': self.request.user.id})
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
