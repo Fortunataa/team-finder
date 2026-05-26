@@ -69,7 +69,7 @@ class ProjectCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
     
     def get_success_url(self):
-        return 'projects:project_detail'
+        return reverse('projects:project_detail', kwargs={'project_id': self.object.id})
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -88,7 +88,7 @@ class ProjectEditView(LoginRequiredMixin, UpdateView):
         return Project.objects.filter(owner=self.request.user)
     
     def get_success_url(self):
-        return 'projects:project_detail'
+        return reverse('projects:project_detail', kwargs={'project_id': self.object.id})
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
