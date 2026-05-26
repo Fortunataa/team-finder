@@ -96,55 +96,56 @@ class ProjectEditView(LoginRequiredMixin, UpdateView):
         return context
 
 
-@method_decorator(require_http_methods(["GET", "POST"]), name='dispatch')
-class SkillAPIView(LoginRequiredMixin, View):
-    """API для управления навыками проекта (только для владельца)."""
+@method_decorator(require_http_methods(["GET"]), name='dispatch')
+class SkillSearchView(LoginRequiredMixin, View):
+    """API для поиска навыков (автодополнение)."""
     
-    def get(self, request, project_id):
-        """Получить список навыков или подсказки для автодополнения."""
-        project = get_object_or_404(Project, id=project_id)
-        
-        if request.user.id != project.owner.id:
-            return JsonResponse({'error': 'Только владелец может управлять навыками'}, status=403)
-        
+    def get(self, request):
         query = request.GET.get('q', '')
-        if query:
-            skills = list(Skill.objects.filter(name__icontains=query)[:10].values('id', 'name'))
-            return JsonResponse({'suggestions': skills})
-        
-        skills = list(project.skills.all().values('id', 'name'))
-        return JsonResponse({'skills': skills})
+        if not query:
+            return JsonResponse([])
+        skills = list(Skill.objects.filter(name__icontains=query)[:10].values('id', 'name'))
+        return JsonResponse(skills, safe=False)
+
+
+@method_decorator(require_http_methods(["POST"]), name='dispatch')
+class SkillAddView(LoginRequiredMixin, View):
+    """API для добавления навыка к проекту."""
     
     def post(self, request, project_id):
-        """Добавить навык к проекту."""
         project = get_object_or_404(Project, id=project_id)
         
         if request.user.id != project.owner.id:
             return JsonResponse({'error': 'Только владелец может управлять навыками'}, status=403)
         
         data = json.loads(request.body)
-        skill_name = data.get('name', '').strip()
+        skill_id = data.get('skill_id')
+        skill_name = data.get('name')
         
-        if not skill_name:
-            return JsonResponse({'error': 'Название навыка не указано'}, status=400)
+        if skill_id:
+            skill = get_object_or_404(Skill, id=skill_id)
+        elif skill_name:
+            skill_name = skill_name.strip()
+            if not skill_name:
+                return JsonResponse({'error': 'Название навыка не указано'}, status=400)
+            skill, _ = Skill.objects.get_or_create(name=skill_name)
+        else:
+            return JsonResponse({'error': 'Не указан skill_id или name'}, status=400)
         
-        skill, created = Skill.objects.get_or_create(name=skill_name)
         project.skills.add(skill)
         
-        return JsonResponse({'id': skill.id, 'name': skill.name, 'created': created})
+        return JsonResponse({'id': skill.id, 'name': skill.name})
+
+
+@method_decorator(require_http_methods(["POST"]), name='dispatch')
+class SkillRemoveView(LoginRequiredMixin, View):
+    """API для удаления навыка из проекта."""
     
-    def delete(self, request, project_id):
-        """Удалить навык из проекта."""
+    def post(self, request, project_id, skill_id):
         project = get_object_or_404(Project, id=project_id)
         
         if request.user.id != project.owner.id:
             return JsonResponse({'error': 'Только владелец может управлять навыками'}, status=403)
-        
-        data = json.loads(request.body)
-        skill_id = data.get('id')
-        
-        if not skill_id:
-            return JsonResponse({'error': 'ID навыка не указан'}, status=400)
         
         skill = get_object_or_404(Skill, id=skill_id)
         project.skills.remove(skill)
