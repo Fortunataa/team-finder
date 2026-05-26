@@ -6,29 +6,62 @@ from .models import User
 class RegisterForm(UserCreationForm):
     """Форма регистрации пользователя."""
     
+    name = forms.CharField(
+        max_length=100,
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Введите имя'})
+    )
+    surname = forms.CharField(
+        max_length=100,
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Введите фамилию'})
+    )
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={'class': 'form-input', 'placeholder': 'Введите email'})
+    )
+    password1 = forms.CharField(
+        label='Пароль',
+        required=True,
+        widget=forms.PasswordInput(attrs={'class': 'form-input', 'placeholder': 'Введите пароль'})
+    )
+    password2 = forms.CharField(
+        label='Подтверждение пароля',
+        required=True,
+        widget=forms.PasswordInput(attrs={'class': 'form-input', 'placeholder': 'Подтвердите пароль'})
+    )
+
     class Meta:
         model = User
-        fields = ('name', 'surname', 'email', 'password1', 'password2')
-        widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Введите имя'}),
-            'surname': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Введите фамилию'}),
-            'email': forms.EmailInput(attrs={'class': 'form-input', 'placeholder': 'Введите email'}),
-            'password1': forms.PasswordInput(attrs={'class': 'form-input', 'placeholder': 'Введите пароль'}),
-            'password2': forms.PasswordInput(attrs={'class': 'form-input', 'placeholder': 'Подтвердите пароль'}),
-        }
+        fields = ('email', 'name', 'surname', 'password1', 'password2')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['name'].label = 'Имя'
-        self.fields['surname'].label = 'Фамилия'
-        self.fields['email'].label = 'Email'
         self.fields['password1'].label = 'Пароль'
         self.fields['password2'].label = 'Подтверждение пароля'
+        if 'username' in self.fields:
+            del self.fields['username']
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError('Пользователь с таким email уже существует.')
+        return email
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.username = self.cleaned_data['email']
+        user.first_name = self.cleaned_data['name']
+        user.last_name = self.cleaned_data['surname']
+        user.email = self.cleaned_data['email']
+        if commit:
+            user.save()
+        return user
 
 
 class LoginForm(AuthenticationForm):
     """Форма входа пользователя."""
-    
+
     username = forms.EmailField(
         label='Email',
         widget=forms.EmailInput(attrs={'class': 'form-input', 'placeholder': 'Введите email'})
@@ -46,7 +79,7 @@ class LoginForm(AuthenticationForm):
 
 class ProfileEditForm(forms.ModelForm):
     """Форма редактирования профиля пользователя."""
-    
+
     class Meta:
         model = User
         fields = ('name', 'surname', 'avatar', 'about', 'phone', 'github_url')
@@ -73,7 +106,7 @@ class ProfileEditForm(forms.ModelForm):
 
 class ChangePasswordForm(forms.Form):
     """Форма смены пароля."""
-    
+
     old_password = forms.CharField(
         label='Текущий пароль',
         widget=forms.PasswordInput(attrs={'class': 'form-input'})
