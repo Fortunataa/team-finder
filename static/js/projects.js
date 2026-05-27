@@ -8,7 +8,7 @@
         const projectId = completeBtn.dataset.id;
         if (!projectId) return;
 
-        fetch(`/projects/${projectId}/complete/`, {
+        fetch(`/projects/api/complete/${projectId}/`, {
           method: "POST",
           headers: {
             "X-CSRFToken": window.getCookie ? window.getCookie("csrftoken") : "",
@@ -18,7 +18,7 @@
         })
         .then(response => response.json())
         .then(data => {
-          if (data.status === "ok") {
+          if (data.success) {
             const statusEl = document.querySelector(".project-status-black");
             if (statusEl) statusEl.textContent = "Закрыт";
             completeBtn.remove();
@@ -39,32 +39,40 @@
     const participantsList = document.getElementById("participants-list");
     const participantsCount = document.getElementById("participants-count");
     if (participateBtn && participantsList && participantsCount) {
-      const userId = participateBtn.dataset.userId || null;
-      const projectId = participateBtn.dataset.project;
-      const userName = participateBtn.dataset.userName || "";
-      const userAvatar = participateBtn.dataset.userAvatar || "";
+      const userId = participateBtn.dataset.userId || participateBtn.getAttribute('data-user-id');
+      const projectId = participateBtn.dataset.project || participateBtn.getAttribute('data-project');
+      const userName = participateBtn.dataset.userName || participateBtn.getAttribute('data-user-name') || "";
+      const userAvatar = participateBtn.dataset.userAvatar || participateBtn.getAttribute('data-user-avatar') || "";
+
+      console.log("Participate button found:", { userId, projectId, userName, userAvatar });
 
       participateBtn.addEventListener("click", function(e) {
         e.preventDefault();
-        if (!projectId) return;
+        if (!projectId) {
+          console.error("Project ID not found");
+          return;
+        }
 
-        fetch(`/projects/${projectId}/toggle-participate/`, {
+        const csrfToken = window.getCookie ? window.getCookie("csrftoken") : "";
+        console.log("CSRF Token:", csrfToken ? "present" : "missing");
+
+        fetch(`/projects/api/participate/${projectId}/`, {
           method: "POST",
           headers: {
-            "X-CSRFToken": window.getCookie ? window.getCookie("csrftoken") : "",
+            "X-CSRFToken": csrfToken,
             "Content-Type": "application/json"
           },
           body: JSON.stringify({})
         })
         .then(resp => resp.json())
         .then(data => {
-          if (data.status !== "ok") {
+          if (!data.action) {
             if (window.toast) window.toast("Ошибка при изменении участия", { type: 'error' });
             else alert("Ошибка при изменении участия");
             return;
           }
 
-          if (data.participant) {
+          if (data.action === 'added') {
             participateBtn.textContent = "Отказаться от участия";
 
             const noParticipants = document.getElementById("no-participants");
@@ -86,7 +94,7 @@
 
             participantsCount.textContent = parseInt(participantsCount.textContent) + 1;
 
-          } else {
+          } else if (data.action === 'removed') {
             participateBtn.textContent = "Участвовать";
 
             const el = document.getElementById(`participant-${userId}`);
