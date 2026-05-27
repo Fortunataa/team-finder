@@ -53,8 +53,26 @@
           return;
         }
 
-        const csrfToken = window.getCookie ? window.getCookie("csrftoken") : "";
-        console.log("CSRF Token:", csrfToken ? "present" : "missing");
+        // Получаем CSRF токен из cookie или meta тега
+        let csrfToken = window.getCookie ? window.getCookie("csrftoken") : "";
+        
+        // Если не нашли в cookie, пробуем получить из meta тега
+        if (!csrfToken) {
+          const metaTag = document.querySelector('meta[name="csrf-token"]');
+          if (metaTag) {
+            csrfToken = metaTag.getAttribute('content');
+          }
+        }
+        
+        // Если все еще нет токена, пробуем из формы
+        if (!csrfToken) {
+          const formInput = document.querySelector('[name=csrfmiddlewaretoken]');
+          if (formInput) {
+            csrfToken = formInput.value;
+          }
+        }
+        
+        console.log("CSRF Token:", csrfToken ? "present (" + csrfToken.substring(0, 10) + "...)" : "missing");
 
         fetch(`/projects/api/participate/${projectId}/`, {
           method: "POST",
@@ -64,8 +82,14 @@
           },
           body: JSON.stringify({})
         })
-        .then(resp => resp.json())
+        .then(resp => {
+          if (!resp.ok) {
+            throw new Error(`HTTP error! status: ${resp.status}`);
+          }
+          return resp.json();
+        })
         .then(data => {
+          console.log("Response data:", data);
           if (!data.action) {
             if (window.toast) window.toast("Ошибка при изменении участия", { type: 'error' });
             else alert("Ошибка при изменении участия");
@@ -113,7 +137,8 @@
         })
         .catch(err => {
           console.error("Ошибка запроса:", err);
-          if (window.toast) window.toast("Ошибка сети", { type: 'error' });
+          if (window.toast) window.toast("Ошибка сети: " + err.message, { type: 'error' });
+          else alert("Ошибка сети: " + err.message);
         });
       });
     }
