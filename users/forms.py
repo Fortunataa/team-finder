@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from .models import User
+from .models import User, Skill
 
 
 class RegisterForm(UserCreationForm):
@@ -79,6 +79,11 @@ class LoginForm(AuthenticationForm):
 
 class ProfileEditForm(forms.ModelForm):
     """Форма редактирования профиля пользователя."""
+    skills = forms.CharField(
+        label='Навыки',
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Введите навыки через запятую'})
+    )
 
     class Meta:
         model = User
@@ -102,6 +107,27 @@ class ProfileEditForm(forms.ModelForm):
         self.fields['github_url'].label = 'GitHub'
         self.fields['name'].required = True
         self.fields['surname'].required = True
+        
+        # Инициализация поля навыков текущими навыками пользователя
+        if self.instance and self.instance.pk:
+            current_skills = self.instance.skills.all()
+            self.fields['skills'].initial = ', '.join([skill.name for skill in current_skills])
+
+    def save(self, commit=True):
+        user = super().save(commit=commit)
+        
+        # Обработка навыков
+        skills_input = self.cleaned_data.get('skills', '')
+        if skills_input:
+            skill_names = [name.strip() for name in skills_input.split(',') if name.strip()]
+            user.skills.clear()
+            for skill_name in skill_names:
+                skill, created = Skill.objects.get_or_create(name=skill_name)
+                user.skills.add(skill)
+        else:
+            user.skills.clear()
+        
+        return user
 
 
 class ChangePasswordForm(forms.Form):

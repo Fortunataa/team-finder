@@ -10,6 +10,7 @@ class User(AbstractUser):
     about = models.TextField(blank=True, null=True, verbose_name='О себе')
     phone = models.CharField(max_length=20, blank=True, null=True, verbose_name='Телефон')
     github_url = models.URLField(blank=True, null=True, verbose_name='GitHub')
+    skills = models.ManyToManyField('Skill', related_name='users', blank=True, verbose_name='Навыки')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата регистрации')
 
     class Meta:
