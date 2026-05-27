@@ -1,2 +1,23 @@
 Watching for file changes with StatReloader
-Error: That port is already in use.
+[27/May/2026 21:47:51] "GET /projects/list/ HTTP/1.1" 200 9666
+Not Found: /users/
+[27/May/2026 21:47:54] "GET /users/ HTTP/1.1" 404 4548
+[27/May/2026 21:48:00] "GET /users/list/ HTTP/1.1" 200 7280
+Not Found: /projects/1/
+[27/May/2026 21:48:05] "GET /projects/1/ HTTP/1.1" 404 4098
+[27/May/2026 21:48:19] "GET /projects/1/ HTTP/1.1" 200 9148
+Forbidden (CSRF cookie not set.): /users/login/
+[27/May/2026 21:48:23] "POST /users/login/ HTTP/1.1" 403 2855
+[27/May/2026 21:48:26] "GET /users/login/ HTTP/1.1" 200 7145
+[27/May/2026 21:48:31] "GET /users/login/ HTTP/1.1" 200 7145
+[27/May/2026 21:48:31] "POST /users/login/ HTTP/1.1" 200 7306
+[27/May/2026 21:48:38] "GET /users/login/ HTTP/1.1" 200 7145
+[27/May/2026 21:48:38] "POST /users/login/ HTTP/1.1" 200 7306
+[27/May/2026 21:48:47] "GET /users/login/ HTTP/1.1" 200 7145
+[27/May/2026 21:48:48] "POST /users/login/ HTTP/1.1" 200 7305
+[27/May/2026 21:48:52] "GET /users/login/ HTTP/1.1" 200 7145
+[27/May/2026 21:48:53] "POST /users/login/ HTTP/1.1" 200 7305
+[27/May/2026 21:48:58] "GET /users/login/ HTTP/1.1" 200 7145
+[27/May/2026 21:48:58] "POST /users/login/ HTTP/1.1" 200 7305
+[27/May/2026 21:49:01] "GET /projects/1/ HTTP/1.1" 200 9148
+[27/May/2026 21:49:04] "GET /projects/1/ HTTP/1.1" 200 9148
