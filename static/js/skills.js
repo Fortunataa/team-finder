@@ -31,7 +31,7 @@
         return;
       }
       t = setTimeout(async () => {
-        const res = await fetch(`/projects/skills/?q=${encodeURIComponent(q)}`);
+        const res = await fetch(`/projects/api/skills/?q=${encodeURIComponent(q)}`);
         if (!res.ok) return;
         const data = await res.json();
 
@@ -100,7 +100,7 @@
       if (e.target.classList.contains("remove-skill-btn")) {
         const chip = e.target.closest(".skill-chip");
         const skillId = chip.dataset.id;
-        const res = await fetch(`/projects/${projectId}/skills/${skillId}/remove/`, {
+        const res = await fetch(`/projects/api/${projectId}/skills/${skillId}/remove/`, {
           method: "POST",
           headers: { "X-CSRFToken": getCookie("csrftoken") }
         });
@@ -111,7 +111,7 @@
     });
 
     async function addSkillById(skillId) {
-      const res = await fetch(`/projects/${projectId}/skills/add/`, {
+      const res = await fetch(`/projects/api/${projectId}/skills/add/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -126,7 +126,7 @@
     }
 
     async function addSkillByName(name) {
-      const res = await fetch(`/projects/${projectId}/skills/add/`, {
+      const res = await fetch(`/projects/api/${projectId}/skills/add/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
