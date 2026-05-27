@@ -8,7 +8,7 @@
         const projectId = completeBtn.dataset.id;
         if (!projectId) return;
 
-        fetch(`/projects/${projectId}/complete/`, {
+        fetch(`/projects/api/complete/${projectId}/`, {
           method: "POST",
           headers: {
             "X-CSRFToken": window.getCookie ? window.getCookie("csrftoken") : "",
@@ -18,7 +18,7 @@
         })
         .then(response => response.json())
         .then(data => {
-          if (data.status === "ok") {
+          if (data.success) {
             const statusEl = document.querySelector(".project-status-black");
             if (statusEl) statusEl.textContent = "Закрыт";
             completeBtn.remove();
@@ -48,7 +48,7 @@
         e.preventDefault();
         if (!projectId) return;
 
-        fetch(`/projects/${projectId}/toggle-participate/`, {
+        fetch(`/projects/api/participate/${projectId}/`, {
           method: "POST",
           headers: {
             "X-CSRFToken": window.getCookie ? window.getCookie("csrftoken") : "",
@@ -58,13 +58,13 @@
         })
         .then(resp => resp.json())
         .then(data => {
-          if (data.status !== "ok") {
+          if (!data.action) {
             if (window.toast) window.toast("Ошибка при изменении участия", { type: 'error' });
             else alert("Ошибка при изменении участия");
             return;
           }
 
-          if (data.participant) {
+          if (data.action === 'added') {
             participateBtn.textContent = "Отказаться от участия";
 
             const noParticipants = document.getElementById("no-participants");
@@ -86,7 +86,7 @@
 
             participantsCount.textContent = parseInt(participantsCount.textContent) + 1;
 
-          } else {
+          } else if (data.action === 'removed') {
             participateBtn.textContent = "Участвовать";
 
             const el = document.getElementById(`participant-${userId}`);

@@ -8,7 +8,7 @@
 
         const projectId = button.dataset.projectId;
         const isFav = button.dataset.fav === "true";
-        const response = await fetch(`/projects/${projectId}/toggle-favorite/`, {
+        const response = await fetch(`/projects/api/favorite/${projectId}/`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
