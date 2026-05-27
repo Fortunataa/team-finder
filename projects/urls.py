@@ -28,7 +28,7 @@ urlpatterns = [
     
     # Участие в проекте
     path('api/participate/<int:project_id>/', views.ParticipateView.as_view(), name='participate'),
-    
+
     # Завершение проекта
     path('api/complete/<int:project_id>/', views.CompleteProjectView.as_view(), name='complete_project'),
     
