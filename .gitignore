@@ -3,48 +3,11 @@
 *.pyc
 __pycache__/
 
-# Database file
-db.sqlite3
-
-# Log files
-*.log
-server.log
+# Database files
+*.sqlite3
 
 # Environment files
 .env
 .env.local
 *.env.*
-
-# Dependencies
-.venv/
-venv/
-node_modules/
-
-# Build artifacts
-dist/
-build/
-target/
-
-# Editors
-.vscode/
-.idea/
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Coverage reports
-coverage/
-htmlcov/
-.coverage
-
-# Temporary files
-*.tmp
-*.swp
-*.swo
-
-# Cache directories
-.mypy_cache/
-.pytest_cache/
-.gradle/
 ```
